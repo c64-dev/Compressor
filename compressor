@@ -1,0 +1,175 @@
+#!/bin/bash
+
+# NAME:     Image Compressor
+# VERSION:  1.5
+# AUTHOR:   (c) 2020 c64-dev (nikosl@protonmail.com)
+# LICENSE:  GNU GPLv3 (http://www.gnu.de/documents/gpl-3.0.en.html)
+#
+# A simple BASH utility for image optimization utilizing JPEG-RECOMPRESS, OPTIPNG and PNGQUANT.
+# These programs use complex algorithms to greatly reduce the size of image files, 
+# while keeping the perceive IQ as close to the original as possible. At the moment JPG
+# and PNG image files are supported.
+#
+# INSTALLATION
+# In order to be able to use the utility from any directory run: sudo mv compressor /usr/local/bin/
+#
+# USAGE
+# compressor <max quality> [input dir] [output dir] 
+# where <max quality> an integer from 1 (lowest) to 100 (highest). Recommended setting between 80-90.
+
+
+# Variables and settings
+IQ="$1"
+INPUT="$2"
+OUTPUT="$3"
+USAGE="Usage: $0 <max quality> [input dir] [output dir]"
+
+
+# Installers for image processors
+install_jpegarchive () {
+    echo -e "\033[0;32m** Info:\033[0m Build mozjpeg." >&2
+    mkdir tmp >/dev/null 2>&1
+    cd tmp
+    sudo apt-get install build-essential autoconf pkg-config nasm libtool
+    git clone https://github.com/mozilla/mozjpeg.git
+    cd mozjpeg
+    cmake -G"Unix Makefiles" -DWITH_JPEG8=1
+    make
+    sudo make install
+    cd ..
+    sleep 1s
+    echo -e "\033[0;32m** Info:\033[0m Build jpeg_archive." >&2
+    git clone https://github.com/danielgtaylor/jpeg-archive
+    cd jpeg-archive
+    make
+    sudo make install
+    cd ../..
+    sudo rm -r tmp >/dev/null 2>&1
+}
+
+install_pngquant () {
+    mkdir tmp >/dev/null 2>&1
+    cd tmp
+    git clone --recursive https://github.com/kornelski/pngquant.git
+    cd pngquant
+    sudo apt install -y libpng-dev
+    make
+    sudo make install
+    cd ../..
+    sudo rm -r tmp >/dev/null 2>&1
+}
+
+install_optipng () {
+    sudo apt-get install -y optipng ;
+}
+
+
+# Usage checks
+if [[ -z "$@" ]]
+  then
+      echo -e "Error: No arguments provided\n$USAGE"
+      exit 1
+elif ! [ "$1" -ge 0 ] 2>/dev/null
+    then
+        echo -e "Error: No max quality specified. Enter IQ from 1 (lowest) to 100 (highest)\n$USAGE"
+        exit 1
+elif [[ -z "$3" ]]
+  then
+      echo -e "Error: No output directory\n$USAGE"
+      exit 1
+elif [[ -d "$2" ]]
+  then
+      echo -e "\n"
+  else
+      echo -e "Error: Input directory not found\n$USAGE"
+      exit 1
+fi
+
+# Main routine
+    echo -e "\033[1;37m                **** Image Compressor v1.5 ****\n\033[0m** An automated utility for high quality image compression. **\n" >&2
+    
+    echo -e "\033[0;32m** Info:\033[0m Copying files to new folder. Please wait..." >&2    
+    mkdir $OUTPUT >/dev/null 2>&1
+    if stat $INPUT*.jpg >/dev/null 2>&1; then
+        cp $INPUT*.jpg $OUTPUT >/dev/null 2>&1
+        cp $INPUT*.jpeg $OUTPUT >/dev/null 2>&1
+        cp $INPUT*.png $OUTPUT >/dev/null 2>&1
+    else
+        cp $INPUT/*.jpg $OUTPUT >/dev/null 2>&1
+        cp $INPUT/*.jpeg $OUTPUT >/dev/null 2>&1
+        cp $INPUT/*.png $OUTPUT >/dev/null 2>&1
+    fi
+    
+    cd $OUTPUT
+    echo -e "\033[0;32m** Info:\033[1;32m Done.\n" >&2
+    sleep 1s
+
+    if find *.jpg &> /dev/null; then
+        if type jpeg-recompress &> /dev/null; then
+            echo -e "\033[1;36m** [JPEG-RECOMPRESS].\033[0;36m OPTIMIZING JPGs **" >&2
+            sleep 1s
+            echo -e "\033[0;32m** Info:\033[0m Checking for dependencies." >&2
+            echo -e "\033[0;32m** Info:\033[0m jpeg-recompress is installed." >&2
+            echo -e "\033[0;32m** Info:\033[0m Proceeding with optimization of images...\n" >&2
+            find -maxdepth 1 -type f -iname "*.jpg" -exec jpeg-recompress --quality veryhigh --method smallfry --accurate -s \{} \{} \;
+            find -maxdepth 1 -type f -iname "*.jpeg" -exec jpeg-recompress --quality veryhigh --method smallfry --accurate -s \{} \{} \;
+            echo -e "\033[0;32m** Info:\033[1;32m Done.\n" >&2
+            sleep 1s
+        else
+            echo -e "\033[1;36m** [JPEG-RECOMPRESS].\033[0;36m OPTIMIZING JPGs **" >&2
+            sleep 1s
+            echo -e "\033[0;32m** Info:\033[0m Checking for dependencies." >&2
+            echo -e "\033[0;31m** Warning:\033[0m jpeg-recompress not found. Installing application...\n" >&2
+            install_jpegarchive
+            echo -e "\033[0;32m** Info:\033[0m Proceeding with optimization of images...\n" >&2        
+            find -maxdepth 1 -type f -iname "*.jpg" -exec jpeg-recompress --quality veryhigh --method smallfry --accurate -s \{} \{} \;
+            find -maxdepth 1 -type f -iname "*.jpeg" -exec jpeg-recompress --quality veryhigh --method smallfry --accurate -s \{} \{} \;
+            echo -e "\033[0;32m** Info:\033[1;32m Done.\n" >&2
+            sleep 1s
+        fi
+    fi
+    
+    if find *.png &> /dev/null; then
+        if type optipng &> /dev/null; then
+            echo -e "\033[1;36m** [OPTIPNG].\033[0;36m OPTIMIZING PNGs **" >&2
+            sleep 1s
+            echo -e "\033[0;32m** Info:\033[0m Checking for dependencies." >&2
+            echo -e "\033[0;32m** Info:\033[0m optipng is installed." >&2
+            echo -e "\033[0;32m** Info:\033[0m Proceeding with optimization of images...\n" >&2
+            find -maxdepth 1 -type f -iname "*.png" -exec optipng \{} \;
+            echo -e "\033[0;32m** Info:\033[1;32m Done.\n" >&2
+            sleep 1s
+        else
+            echo -e "\033[1;36m** [OPTIPNG].\033[0;36m OPTIMIZING PNGs **" >&2
+            sleep 1s
+            echo -e "\033[0;32m** Info:\033[0m Checking for dependencies." >&2
+            echo -e "\033[0;31m** Warning:\033[0m optipng not found. Installing application...\n" >&2
+            install_optipng
+            echo -e "\033[0;32m** Info:\033[0m Proceeding with optimization of images...\n" >&2        
+            find -maxdepth 1 -type f -iname "*.png" -exec optipng \{} \;
+            echo -e "\033[0;32m** Info:\033[1;32m Done.\n" >&2
+            sleep 1s
+        fi
+
+        if type pngquant &> /dev/null; then
+            echo -e "\033[1;36m** [PNGQUANT].\033[0;36m OPTIMIZING PNGs **" >&2
+            sleep 1s
+            echo -e "\033[0;32m** Info:\033[0m Checking for dependencies." >&2
+            echo -e "\033[0;32m** Info:\033[0m pngquant is installed." >&2
+            echo -e "\033[0;32m** Info:\033[0m Proceeding with optimization of images...\n" >&2
+            pngquant *.png --force --ext .png --verbose
+            cd ..
+            echo -e "\033[1;32m** Info:\033[0m Cleaning up. All done. \n\033[1;32m** Info:\033[0m Images optimized. \n\033[1;32m** Info:\033[0m You can find all processed images in output subfolder" >&2
+        else
+            echo -e "\033[1;36m** [PNGQUANT].\033[0;36m OPTIMIZING PNGs **" >&2
+            sleep 1s
+            echo -e "\033[0;32m** Info:\033[0m Checking for dependencies." >&2
+            echo -e "\033[0;31m** Warning:\033[0m pngquant not found. Installing application...\n" >&2
+            install_pngquant
+            echo -e "\033[0;32m** Info:\033[0m Proceeding with optimization of images...\n" >&2        
+            pngquant *.png --force --ext .png --verbose
+            cd ..
+            echo -e "\033[1;32m** Info:\033[0m Cleaning up. All done. \n\033[1;32m** Info:\033[0m Images optimized. \n\033[1;32m** Info:\033[0m You can find all processed images in output subfolder" >&2
+        fi
+    fi
+    
