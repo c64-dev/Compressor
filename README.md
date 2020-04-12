@@ -16,18 +16,18 @@ These utilities use complex algorithms to greatly reduce the size of image files
 Simply download or clone the repository and extract to any folder.
 In order to be able to use the utility from any directory run: 
 
-'''
+```bash
 sudo mv compressor.sh /usr/local/bin/compressor
-'''
+```
 
 ### Usage
 Run the utility from a terminal window as follows:
 
-'''
+```bash
 compressor <max quality> [input dir] [output dir] 
-'''
+```
 
-where '<max quality>' an integer from 1 (lowest) to 100 (highest). This states the maximum quality for the compressor to use. Recommended setting between 80-90.
+where `<max quality>` an integer from 1 (lowest) to 100 (highest). This states the maximum quality for the compressor to use. Recommended setting between 80-90.
 
 
 Utilities
