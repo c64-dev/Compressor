@@ -17,7 +17,7 @@ Simply download or clone the repository and extract to any folder.
 In order to be able to use the utility from any directory run: 
 
 ```bash
-sudo mv compressor.sh /usr/local/bin/compressor
+sudo mv compressor /usr/local/bin/compressor
 ```
 
 ### Usage
