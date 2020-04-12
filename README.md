@@ -3,10 +3,9 @@ Compress JPEG and PNG files in a folder utilizing all CPU cores. This is a simpl
 
 * [jpeg-recompress](https://github.com/danielgtaylor/jpeg-archive)
 * [optipng](http://optipng.sourceforge.net/)
-* [pngquant](https://github.com/kornelski/pngquant).
+* [pngquant](https://github.com/kornelski/pngquant)
 
-These utilities use complex algorithms to greatly reduce the size of image files, while keeping the perceive IQ as close to the original as possible. 
-At the moment JPG and PNG image files are supported.
+These utilities use complex algorithms to greatly reduce the size of image files, while keeping the perceived IQ as close to the original as possible. At the moment JPG and PNG image files are supported.
 
 ### Features
 * Automatic parsing of all image files inside specified directory
@@ -17,14 +16,18 @@ At the moment JPG and PNG image files are supported.
 Simply download or clone the repository and extract to any folder.
 In order to be able to use the utility from any directory run: 
 
+'''
 sudo mv compressor.sh /usr/local/bin/compressor
+'''
 
 ### Usage
 Run the utility from a terminal window as follows:
 
+'''
 compressor <max quality> [input dir] [output dir] 
+'''
 
-where <max quality> an integer from 1 (lowest) to 100 (highest). This states the maximum quality for the compressor to use. Recommended setting between 80-90.
+where '<max quality>' an integer from 1 (lowest) to 100 (highest). This states the maximum quality for the compressor to use. Recommended setting between 80-90.
 
 
 Utilities
